@@ -35,8 +35,8 @@ void setup() {
   twai_timing_config_t t_config = TWAI_TIMING_CONFIG_500KBITS();
 //  twai_filter_config_t f_config = TWAI_FILTER_CONFIG_ACCEPT_ALL();
   twai_filter_config_t f_config = {
-    .acceptance_code = 0x61002020, //This sucks a lot to calculate
-    .acceptance_mask = 0x001F001F, // 0 is for care bits?
+    .acceptance_code = 0x61002020, // This sucks a lot to calculate; take ID and lsh 5 bits; this is 0x308 and 0x101
+    .acceptance_mask = 0x001F001F, // 0 is for care bits? This equates to only care about ID
     .single_filter = false
   };
   if(twai_driver_install(&g_config, &t_config, &f_config) == ESP_OK) {
@@ -95,7 +95,15 @@ static void sendCANstart() {
   } else {
     Serial.println("CAN1: Failed to queue message for transmission");
   }
-  delay(200);
+  while (startSIG == 1){
+    delay(100);
+    readCAN1();
+    if (twai_transmit(&startHI, pdMS_TO_TICKS(1000)) == ESP_OK) {
+    Serial.println("CAN1: Start HI Message queued for transmission");
+    } else {
+    Serial.println("CAN1: Failed to queue message for transmission");
+    }
+  }
   if (twai_transmit(&startLO, pdMS_TO_TICKS(1000)) == ESP_OK) {
     Serial.println("CAN1: Start LO Message queued for transmission");
   } else {
