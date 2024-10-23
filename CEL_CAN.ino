@@ -33,12 +33,12 @@ void setup() {
   Serial.println("Initializing builtin CAN peripheral");
   twai_general_config_t g_config = TWAI_GENERAL_CONFIG_DEFAULT((gpio_num_t)CAN1_TX, (gpio_num_t)CAN1_RX, TWAI_MODE_NORMAL);
   twai_timing_config_t t_config = TWAI_TIMING_CONFIG_500KBITS();
-  twai_filter_config_t f_config = TWAI_FILTER_CONFIG_ACCEPT_ALL();
-//  twai_filter_config_t f_config = {
-//    .acceptance_code = 0x00, //This sucks a lot to calculate
-//    .acceptance_mask = 0x00000000,
-//    .single_filter = false
-//  };
+//  twai_filter_config_t f_config = TWAI_FILTER_CONFIG_ACCEPT_ALL();
+  twai_filter_config_t f_config = {
+    .acceptance_code = 0x61002020, //This sucks a lot to calculate
+    .acceptance_mask = 0x001F001F, // 0 is for care bits?
+    .single_filter = false
+  };
   if(twai_driver_install(&g_config, &t_config, &f_config) == ESP_OK) {
     Serial.println("CAN1 Driver initialized");
   } else {
